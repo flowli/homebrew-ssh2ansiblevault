@@ -1,0 +1,47 @@
+#!/bin/bash
+
+###################################################################
+#   SCRIPT TO WRITE SSH CONFIG FILES INTO AN ANSIBLE VAULT FILE   #
+###################################################################
+
+## init
+# script directory
+PWD=`dirname $0`
+
+# check outfile
+if [ "$1" == "" ]; then
+	echo "Syntax: $0 <outfile.yml>"
+	exit 1
+fi
+OUTFILE="$1"
+rm -f "$OUTFILE"
+touch "$OUTFILE"
+
+## request password
+read -s -p "Enter Password: " VAULT_PASSWORD
+echo ""
+read -s -p "Confirm Password: " VAULT_PASSWORD2
+echo ""
+if [ "$VAULT_PASSWORD" != "$VAULT_PASSWORD2" ]; then
+	echo "Error: passwords do not match."
+	exit 2
+fi
+VPF="$PWD/.tmp_vault_pass"
+echo "$VAULT_PASSWORD" > "$VPF"
+
+## add files' content
+FILES=("id_rsa" "id_rsa.pub" "known_hosts" "authorized_keys")
+
+for ix in ${!FILES[*]}; do
+	FILE="${FILES[$ix]}"
+	if [ -e "$FILE" ]; then
+		echo "Adding ${FILE}"
+		cat "$FILE" | ansible-vault encrypt_string --vault-password-file "$VPF" --stdin-name "${FILE}" >> "$OUTFILE"
+	else
+		echo "File ${FILE} does not exist"
+	fi
+done
+
+## clean up
+# delete temporary password file
+rm -f "$VPF"
