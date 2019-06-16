@@ -36,7 +36,8 @@ for ix in ${!FILES[*]}; do
 	FILE="${FILES[$ix]}"
 	if [ -e "$FILE" ]; then
 		echo "Adding ${FILE}"
-		cat "$FILE" | ansible-vault encrypt_string --vault-password-file "$VPF" --stdin-name "${FILE}" >> "$OUTFILE"
+		VARNAME=`echo "$FILE" | tr . _`
+		cat "$FILE" | ansible-vault encrypt_string --vault-password-file "$VPF" --stdin-name "${VARNAME}" >> "$OUTFILE"
 	else
 		echo "File ${FILE} does not exist"
 	fi
