@@ -1,4 +1,4 @@
-class ssh2av < Formula
+class SSH2AV < Formula
   desc "Writes SSH config file to an Ansible Vault YML variable file"
   homepage "https://arweb.de"
   version "0.1"
